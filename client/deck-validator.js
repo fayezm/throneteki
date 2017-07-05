@@ -223,11 +223,16 @@ module.exports = function validateDeck(deck, packs) {
     }
 
     if(isValid) {
-        if(!_.all(combined, card => {
+        let unreleasedCards = _.reject(combined, card => {
             return isCardInReleasedPack(packs, card);
-        })) {
+        });
+
+        if(_.size(unreleasedCards) !== 0) {
             status = 'Unreleased Cards';
-            extendedStatus.push('Deck has cards that are not yet released');
+
+            _.each(unreleasedCards, card => {
+                extendedStatus.push(card.card.label + ' is not yet released');
+            });
         }
     }
 
