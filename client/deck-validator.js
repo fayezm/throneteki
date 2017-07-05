@@ -180,7 +180,7 @@ module.exports = function validateDeck(deck, packs) {
     }
 
     // Alliance
-    let bannerCount = 0;
+    let bannerCards = {};
     if((!deck.agenda || deck.agenda && deck.agenda.code !== '06018') && !_.all(combined, card => {
         let faction = card.card.faction_code.toLowerCase();
         let bannerCard = false;
