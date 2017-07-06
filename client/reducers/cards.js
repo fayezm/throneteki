@@ -167,6 +167,18 @@ export default function(state = {}, action) {
             });
 
             return newState;
+        case 'DECK_DELETED':            
+            newState = Object.assign({}, state, {
+                deckDeleted: true
+            });
+
+            newState.decks = _.reject(newState.decks, deck => {
+                return deck._id === action.response.deckId;
+            });
+
+            newState.selectedDeck = _.first(newState.decks);
+
+            return newState;
         default:
             return state;
     }

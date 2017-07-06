@@ -1,5 +1,4 @@
 import React from 'react';
-import $ from 'jquery';
 import _ from 'underscore';
 import {connect} from 'react-redux';
 
@@ -42,29 +41,7 @@ class InnerDecks extends React.Component {
     onConfirmDeleteClick(event) {
         event.preventDefault();
 
-        var selectedDeck = undefined;
-
-        if(this.state.selectedDeck !== undefined) {
-            selectedDeck = this.state.decks[this.state.selectedDeck];
-        }
-
-        $.ajax({
-            url: '/api/decks/' + selectedDeck._id,
-            type: 'DELETE'
-        }).done(data => {
-            if(!data.success) {
-                this.setState({ error: data.message });
-                return;
-            }
-
-            this.setState({
-                decks: _.reject(this.state.decks, deck => {
-                    return deck._id === selectedDeck._id;
-                })
-            });
-        }).fail(() => {
-            this.setState({ error: 'Could not communicate with the server.  Please try again later.' });
-        });
+        this.props.deleteDeck(this.props.selectedDeck);
 
         this.setState({ showDelete: false });
     }
@@ -94,9 +71,9 @@ class InnerDecks extends React.Component {
             deckInfo = (<div className='col-sm-6'>
                 <div className='btn-group'>
                     <button className='btn btn-primary' onClick={ this.onEditClick.bind(this) }>Edit</button>
-                    <button className='btn btn-primary' onClick={this.onDeleteClick}>Delete</button>
+                    <button className='btn btn-primary' onClick={ this.onDeleteClick }>Delete</button>
                     {this.state.showDelete ?
-                        <button className='btn btn-danger' onClick={this.onConfirmDeleteClick}>Delete</button> :
+                        <button className='btn btn-danger' onClick={ this.onConfirmDeleteClick }>Delete</button> :
                         null}
                 </div>
                 <DeckSummary deck={ this.props.selectedDeck } cards={ this.props.cards } />
@@ -105,6 +82,14 @@ class InnerDecks extends React.Component {
 
         let content = null;
 
+        let successPanel = null;
+        
+        if(this.props.deckDeleted) {
+            successPanel = (
+                <AlertPanel message='Deck deleted successfully' type={ 'success' } timeout={ 5 } />
+            );
+        }    
+
         if(this.props.loading) {
             content = <div>Loading decks from the server...</div>;
         } else if(this.props.apiError) {
@@ -112,6 +97,7 @@ class InnerDecks extends React.Component {
         } else {
             content = (
                 <div>
+                    { successPanel }
                     <div className='col-sm-6'>
                         <Link className='btn btn-primary' href='/decks/add'>Add new deck</Link>
                         <div className='deck-list'>{ !this.props.decks || this.props.decks.length === 0 ? 'You have no decks, try adding one.' : deckList }</div>
@@ -128,7 +114,9 @@ InnerDecks.displayName = 'Decks';
 InnerDecks.propTypes = {
     apiError: React.PropTypes.string,
     cards: React.PropTypes.object,
+    deckDeleted: React.PropTypes.bool,
     decks: React.PropTypes.array,
+    deleteDeck: React.PropTypes.func,
     loadDecks: React.PropTypes.func,
     loading: React.PropTypes.bool,
     navigate: React.PropTypes.func,
@@ -140,6 +128,7 @@ function mapStateToProps(state) {
     return {
         apiError: state.api.message,
         cards: state.cards.cards,
+        deckDeleted: state.cards.deckDeleted,
         decks: state.cards.decks,
         loading: state.api.loading,
         selectedDeck: state.cards.selectedDeck

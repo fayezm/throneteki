@@ -45,6 +45,17 @@ export function updateDeck(deck) {
     };
 }
 
+export function deleteDeck(deck) {
+    return {
+        types: ['DELETE_DECK', 'DECK_DELETED'],
+        shouldCallAPI: () => true,
+        callAPI: () => $.ajax({
+            url: '/api/decks/' + deck._id,
+            type: 'DELETE'
+        })
+    };
+}
+
 export function saveDeck(deck) {
     let str = JSON.stringify({
         deckName: deck.name,

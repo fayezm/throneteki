@@ -145,7 +145,7 @@ module.exports.init = function(server) {
                     return next(err);
                 }
 
-                res.send({ success: true, message: 'Deck deleted successfully' });
+                res.send({ success: true, message: 'Deck deleted successfully', deckId: req.params.id });
             });
         });
     });
